@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionTrack AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0b1120;
+            color: #e5e7eb;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 22px 7%;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+
+        .status {
+            color: #4ade80;
+            font-size: 13px;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .hero {
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            font-size: 34px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .panel {
+            background: #111c31;
+            border: 1px solid #25344c;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            margin-bottom: 18px;
+        }
+
+        .upload-box {
+            border: 2px dashed #334e75;
+            padding: 35px 20px;
+            text-align: center;
+            border-radius: 12px;
+            background: #0e1728;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+            color: #cbd5e1;
+        }
+
+        button {
+            border: none;
+            padding: 13px 25px;
+            background: #2563eb;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: #111c31;
+            border: 1px solid #25344c;
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .stat p {
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .stat h3 {
+            font-size: 30px;
+            color: #60a5fa;
+        }
+
+        .result-image, video {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid #334155;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 13px;
+            border-bottom: 1px solid #26344a;
+        }
+
+        th {
+            color: #93c5fd;
+        }
+
+        .error {
+            background: #451a1a;
+            color: #fca5a5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .empty {
+            color: #94a3b8;
+            margin-top: 12px;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            padding: 25px;
+            font-size: 13px;
+        }
+
+        @media(max-width:600px) {
+            .hero h1 {
+                font-size: 26px;
+            }
+
+            header {
+                padding: 18px;
+            }
+
+            main {
+                padding: 12px;
+            }
+
+            .panel {
+                padding: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand">◈ VisionTrack AI</div>
+    <div class="status">● AI Engine Ready</div>
+</header>
+
+<main>
+
+    <section class="hero">
+        <h1>AI-Powered Object Detection & Tracking</h1>
+        <p>
+            Analyze images and videos, detect objects, count detections
+            and track objects across video frames.
+        </p>
+    </section>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <section class="panel">
+        <h2>Image Detection</h2>
+
+        <div class="upload-box">
+            <p>Select an image to analyze</p>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input
+                    type="file"
+                    name="image"
+                    accept=".jpg,.jpeg,.png,.webp"
+                    required
+                >
+                <button type="submit">Detect Objects</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Video Tracking</h2>
+
+        <div class="upload-box">
+            <p>Select a video to detect and track objects</p>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input
+                    type="file"
+                    name="video"
+                    accept=".mp4,.avi,.mov,.mkv"
+                    required
+                >
+                <button type="submit">Track Objects</button>
+            </form>
+        </div>
+    </section>
+
+    {% if result_image or result_video %}
+
+        <div class="cards">
+            <div class="stat">
+                <p>Total Detections</p>
+                <h3>{{ total_objects }}</h3>
+            </div>
+
+            <div class="stat">
+                <p>Object Categories</p>
+                <h3>{{ detections|length }}</h3>
+            </div>
+
+            {% if result_video %}
+            <div class="stat">
+                <p>Unique Tracking IDs</p>
+                <h3>{{ tracked_ids|length }}</h3>
+            </div>
+            {% endif %}
+        </div>
+
+        <section class="panel">
+            <h2>Detection Output</h2>
+            <p class="empty">File: {{ uploaded_filename }}</p>
+
+            {% if result_image %}
+                <img
+                    src="{{ result_image }}"
+                    class="result-image"
+                    alt="Detection result"
+                >
+            {% endif %}
+
+            {% if result_video %}
+                <video controls>
+                    <source src="{{ result_video }}" type="video/mp4">
+                    Your browser does not support video playback.
+                </video>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h2>Detection Statistics</h2>
+
+            {% if detections %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Object</th>
+                            <th>Count</th>
+                            <th>Avg. Confidence</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in detections %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.count }}</td>
+                            <td>
+                                {% if item.confidence %}
+                                    {{ item.confidence }}%
+                                {% else %}
+                                    Frame detections
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty">No objects detected.</p>
+            {% endif %}
+        </section>
+
+    {% endif %}
+
+</main>
+
+<footer>
+    VisionTrack AI | Computer Vision & Object Tracking
+</footer>
+
+</body>
+</html>
